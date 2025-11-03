@@ -219,8 +219,13 @@ The system uses Google's Gemini Pro API for:
    - Assigns priority levels
 
 ### API Configuration
+For production, consider using environment variables:
+
 ```typescript
-GEMINI_API_KEY = "AIzaSyBdB4zF0VNq70VzvVOxbA7UPAGa331r6zU"
+// .env
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_GEMINI_API_KEY=your_gemini_key
 ```
 
 ## 📱 Navigation Updates
@@ -460,7 +465,7 @@ All planned features have been successfully implemented:
 ✅ Activity Detail View with NetAcad links
 ✅ Teacher Activity Library
 ✅ Custom Activity Creator
-✅ NetAcad Activity Importer
+✅ NetAcad Importer
 ✅ Student Targeting with AI recommendations
 ✅ Firebase data structure and integration
 ✅ Shared components (ActivityCard, NetAcadLinkButton)
