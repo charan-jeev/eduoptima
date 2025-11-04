@@ -122,6 +122,158 @@ const defaultPracticeScenarios = [
       'Remember to use the correct subnet mask for each network',
     ],
   },
+  {
+    id: 4,
+    title: 'OSPF Configuration',
+    difficulty: 'Advanced',
+    points: 250,
+    description: 'Configure OSPF routing protocol for dynamic routing',
+    instructions: [
+      'Enter privileged EXEC mode',
+      'Enter global configuration mode',
+      'Enable OSPF process 1',
+      'Configure OSPF network 192.168.1.0 with wildcard 0.0.0.255 in area 0',
+      'Configure OSPF network 10.0.0.0 with wildcard 0.0.0.255 in area 0',
+    ],
+    commands: [
+      'enable',
+      'configure terminal',
+      'router ospf 1',
+      'network 192.168.1.0 0.0.0.255 area 0',
+      'network 10.0.0.0 0.0.0.255 area 0',
+    ],
+    hints: [
+      'Use "enable" to enter privileged mode',
+      'Use "configure terminal" to enter global config',
+      'Use "router ospf [process-id]" to enable OSPF',
+      'Use "network [network] [wildcard] area [area-id]" to advertise networks',
+      'Wildcard mask is the inverse of subnet mask',
+    ],
+  },
+  {
+    id: 5,
+    title: 'Switch Port Security',
+    difficulty: 'Intermediate',
+    points: 180,
+    description: 'Configure port security to limit MAC addresses on switch ports',
+    instructions: [
+      'Enter privileged EXEC mode',
+      'Enter global configuration mode',
+      'Enter interface FastEthernet 0/2',
+      'Enable port security',
+      'Set maximum MAC addresses to 2',
+      'Set violation mode to restrict',
+    ],
+    commands: [
+      'enable',
+      'configure terminal',
+      'interface fastethernet 0/2',
+      'switchport port-security',
+      'switchport port-security maximum 2',
+      'switchport port-security violation restrict',
+    ],
+    hints: [
+      'Use "enable" to enter privileged mode',
+      'Use "configure terminal" to enter global config',
+      'Use "interface [type] [number]" to configure a port',
+      'Use "switchport port-security" to enable port security',
+      'Use "switchport port-security maximum [number]" to set limit',
+      'Use "switchport port-security violation [mode]" to set violation action',
+    ],
+  },
+  {
+    id: 6,
+    title: 'DHCP Configuration',
+    difficulty: 'Intermediate',
+    points: 170,
+    description: 'Configure a router as a DHCP server to assign IP addresses',
+    instructions: [
+      'Enter privileged EXEC mode',
+      'Enter global configuration mode',
+      'Create DHCP pool named LAN_POOL',
+      'Set the network to 192.168.10.0 with subnet mask 255.255.255.0',
+      'Set the default gateway to 192.168.10.1',
+      'Set the DNS server to 8.8.8.8',
+    ],
+    commands: [
+      'enable',
+      'configure terminal',
+      'ip dhcp pool LAN_POOL',
+      'network 192.168.10.0 255.255.255.0',
+      'default-router 192.168.10.1',
+      'dns-server 8.8.8.8',
+    ],
+    hints: [
+      'Use "enable" to enter privileged mode',
+      'Use "configure terminal" to enter global config',
+      'Use "ip dhcp pool [name]" to create a DHCP pool',
+      'Use "network [network] [mask]" to define the pool range',
+      'Use "default-router [ip]" to set the gateway',
+      'Use "dns-server [ip]" to configure DNS',
+    ],
+  },
+  {
+    id: 7,
+    title: 'Access Control List (ACL)',
+    difficulty: 'Advanced',
+    points: 220,
+    description: 'Create and apply an ACL to filter network traffic',
+    instructions: [
+      'Enter privileged EXEC mode',
+      'Enter global configuration mode',
+      'Create standard ACL 10',
+      'Deny traffic from host 192.168.1.100',
+      'Permit all other traffic',
+      'Apply ACL 10 to interface GigabitEthernet 0/0 outbound',
+    ],
+    commands: [
+      'enable',
+      'configure terminal',
+      'access-list 10 deny host 192.168.1.100',
+      'access-list 10 permit any',
+      'interface gigabitethernet 0/0',
+      'ip access-group 10 out',
+    ],
+    hints: [
+      'Use "enable" to enter privileged mode',
+      'Use "configure terminal" to enter global config',
+      'Use "access-list [number] [permit|deny] [source]" to create ACL entries',
+      'Use "host [ip]" to specify a single host',
+      'Use "any" to match all addresses',
+      'Use "ip access-group [number] [in|out]" to apply ACL to interface',
+    ],
+  },
+  {
+    id: 8,
+    title: 'Trunk Port Configuration',
+    difficulty: 'Intermediate',
+    points: 160,
+    description: 'Configure a switch port as a trunk to carry multiple VLANs',
+    instructions: [
+      'Enter privileged EXEC mode',
+      'Enter global configuration mode',
+      'Enter interface GigabitEthernet 0/1',
+      'Set the port to trunk mode',
+      'Set native VLAN to 99',
+      'Allow all VLANs on the trunk',
+    ],
+    commands: [
+      'enable',
+      'configure terminal',
+      'interface gigabitethernet 0/1',
+      'switchport mode trunk',
+      'switchport trunk native vlan 99',
+      'switchport trunk allowed vlan all',
+    ],
+    hints: [
+      'Use "enable" to enter privileged mode',
+      'Use "configure terminal" to enter global config',
+      'Use "interface [type] [number]" to configure a port',
+      'Use "switchport mode trunk" to set trunk mode',
+      'Use "switchport trunk native vlan [number]" to set native VLAN',
+      'Use "switchport trunk allowed vlan all" to allow all VLANs',
+    ],
+  },
 ];
 
 export default function PracticeLabView({ onNavigate, onLogout }: PracticeLabViewProps) {
@@ -325,85 +477,199 @@ ${context}`
     if (!generationPrompt.trim() || isGeneratingScenario) return;
     setIsGeneratingScenario(true);
     setGenerationError('');
+    
+    // Simulate API delay for better UX
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
     try {
-      const systemPrompt = `You are an assistant that generates Cisco IOS terminal lab scenarios for students. Given a teacher prompt, produce a JSON object with the exact schema below. Keep instructions and commands tightly aligned and concise. Do not include any text outside of the JSON.
-
-Schema:
-{
-  "title": string,
-  "difficulty": "Beginner" | "Intermediate" | "Advanced",
-  "points": number,
-  "description": string,
-  "instructions": string[],
-  "commands": string[],
-  "hints": string[]
-}
-
-Constraints:
-- commands must be IOS commands executable in sequence to complete the lab
-- instructions map 1:1 to commands in order
-- hints correspond 1:1 to instructions, brief and actionable
-- keep total steps between 4 and 8
-- prefer realistic device/interface names (e.g., GigabitEthernet0/0)
-`;
-
-      const teacherPrompt = generationPrompt.trim();
-      const body = {
-        contents: [
-          { parts: [{ text: systemPrompt }] },
-          { parts: [{ text: `Teacher prompt: ${teacherPrompt}` }] },
-        ],
-        generationConfig: {
-          temperature: 0.5,
-          topK: 32,
-          topP: 0.95,
-          maxOutputTokens: 512,
-        },
-      } as any;
-
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`,
+      const prompt = generationPrompt.trim().toLowerCase();
+      
+      // Hardcoded activities (5 additional ones beyond the default 3)
+      const hardcodedActivities = [
         {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body),
-        }
-      );
-      const data = await res.json();
-      const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          id: Date.now(),
+          title: 'OSPF Configuration',
+          difficulty: 'Advanced' as const,
+          points: 250,
+          description: 'Configure OSPF routing protocol for dynamic routing',
+          instructions: [
+            'Enter privileged EXEC mode',
+            'Enter global configuration mode',
+            'Enable OSPF process 1',
+            'Configure OSPF network 192.168.1.0 with wildcard 0.0.0.255 in area 0',
+            'Configure OSPF network 10.0.0.0 with wildcard 0.0.0.255 in area 0',
+          ],
+          commands: [
+            'enable',
+            'configure terminal',
+            'router ospf 1',
+            'network 192.168.1.0 0.0.0.255 area 0',
+            'network 10.0.0.0 0.0.0.255 area 0',
+          ],
+          hints: [
+            'Use "enable" to enter privileged mode',
+            'Use "configure terminal" to enter global config',
+            'Use "router ospf [process-id]" to enable OSPF',
+            'Use "network [network] [wildcard] area [area-id]" to advertise networks',
+            'Wildcard mask is the inverse of subnet mask',
+          ],
+        },
+        {
+          id: Date.now() + 1,
+          title: 'Switch Port Security',
+          difficulty: 'Intermediate' as const,
+          points: 180,
+          description: 'Configure port security to limit MAC addresses on switch ports',
+          instructions: [
+            'Enter privileged EXEC mode',
+            'Enter global configuration mode',
+            'Enter interface FastEthernet 0/2',
+            'Enable port security',
+            'Set maximum MAC addresses to 2',
+            'Set violation mode to restrict',
+          ],
+          commands: [
+            'enable',
+            'configure terminal',
+            'interface fastethernet 0/2',
+            'switchport port-security',
+            'switchport port-security maximum 2',
+            'switchport port-security violation restrict',
+          ],
+          hints: [
+            'Use "enable" to enter privileged mode',
+            'Use "configure terminal" to enter global config',
+            'Use "interface [type] [number]" to configure a port',
+            'Use "switchport port-security" to enable port security',
+            'Use "switchport port-security maximum [number]" to set limit',
+            'Use "switchport port-security violation [mode]" to set violation action',
+          ],
+        },
+        {
+          id: Date.now() + 2,
+          title: 'DHCP Configuration',
+          difficulty: 'Intermediate' as const,
+          points: 170,
+          description: 'Configure a router as a DHCP server to assign IP addresses',
+          instructions: [
+            'Enter privileged EXEC mode',
+            'Enter global configuration mode',
+            'Create DHCP pool named LAN_POOL',
+            'Set the network to 192.168.10.0 with subnet mask 255.255.255.0',
+            'Set the default gateway to 192.168.10.1',
+            'Set the DNS server to 8.8.8.8',
+          ],
+          commands: [
+            'enable',
+            'configure terminal',
+            'ip dhcp pool LAN_POOL',
+            'network 192.168.10.0 255.255.255.0',
+            'default-router 192.168.10.1',
+            'dns-server 8.8.8.8',
+          ],
+          hints: [
+            'Use "enable" to enter privileged mode',
+            'Use "configure terminal" to enter global config',
+            'Use "ip dhcp pool [name]" to create a DHCP pool',
+            'Use "network [network] [mask]" to define the pool range',
+            'Use "default-router [ip]" to set the gateway',
+            'Use "dns-server [ip]" to configure DNS',
+          ],
+        },
+        {
+          id: Date.now() + 3,
+          title: 'Access Control List (ACL)',
+          difficulty: 'Advanced' as const,
+          points: 220,
+          description: 'Create and apply an ACL to filter network traffic',
+          instructions: [
+            'Enter privileged EXEC mode',
+            'Enter global configuration mode',
+            'Create standard ACL 10',
+            'Deny traffic from host 192.168.1.100',
+            'Permit all other traffic',
+            'Apply ACL 10 to interface GigabitEthernet 0/0 outbound',
+          ],
+          commands: [
+            'enable',
+            'configure terminal',
+            'access-list 10 deny host 192.168.1.100',
+            'access-list 10 permit any',
+            'interface gigabitethernet 0/0',
+            'ip access-group 10 out',
+          ],
+          hints: [
+            'Use "enable" to enter privileged mode',
+            'Use "configure terminal" to enter global config',
+            'Use "access-list [number] [permit|deny] [source]" to create ACL entries',
+            'Use "host [ip]" to specify a single host',
+            'Use "any" to match all addresses',
+            'Use "ip access-group [number] [in|out]" to apply ACL to interface',
+          ],
+        },
+        {
+          id: Date.now() + 4,
+          title: 'Trunk Port Configuration',
+          difficulty: 'Intermediate' as const,
+          points: 160,
+          description: 'Configure a switch port as a trunk to carry multiple VLANs',
+          instructions: [
+            'Enter privileged EXEC mode',
+            'Enter global configuration mode',
+            'Enter interface GigabitEthernet 0/1',
+            'Set the port to trunk mode',
+            'Set native VLAN to 99',
+            'Allow all VLANs on the trunk',
+          ],
+          commands: [
+            'enable',
+            'configure terminal',
+            'interface gigabitethernet 0/1',
+            'switchport mode trunk',
+            'switchport trunk native vlan 99',
+            'switchport trunk allowed vlan all',
+          ],
+          hints: [
+            'Use "enable" to enter privileged mode',
+            'Use "configure terminal" to enter global config',
+            'Use "interface [type] [number]" to configure a port',
+            'Use "switchport mode trunk" to set trunk mode',
+            'Use "switchport trunk native vlan [number]" to set native VLAN',
+            'Use "switchport trunk allowed vlan all" to allow all VLANs',
+          ],
+        },
+      ];
 
-      // Extract JSON block
-      const jsonMatch = text.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('Malformed AI response');
-      const parsed = JSON.parse(jsonMatch[0]);
-
-      // Basic validation
-      if (!parsed.title || !Array.isArray(parsed.instructions) || !Array.isArray(parsed.commands)) {
-        throw new Error('Invalid scenario structure');
-      }
-      if (parsed.instructions.length !== parsed.commands.length) {
-        throw new Error('Instructions and commands length mismatch');
+      // Keyword matching to select appropriate activity
+      let selectedActivity = hardcodedActivities[0]; // Default to first activity
+      
+      if (prompt.includes('ospf') || prompt.includes('routing') || prompt.includes('dynamic')) {
+        selectedActivity = hardcodedActivities[0];
+      } else if (prompt.includes('port security') || prompt.includes('security') || prompt.includes('mac')) {
+        selectedActivity = hardcodedActivities[1];
+      } else if (prompt.includes('dhcp') || prompt.includes('ip address') || prompt.includes('automatic')) {
+        selectedActivity = hardcodedActivities[2];
+      } else if (prompt.includes('acl') || prompt.includes('access control') || prompt.includes('filter') || prompt.includes('firewall')) {
+        selectedActivity = hardcodedActivities[3];
+      } else if (prompt.includes('trunk') || prompt.includes('vlan') || prompt.includes('multiple')) {
+        selectedActivity = hardcodedActivities[4];
+      } else {
+        // Randomly select one of the 5 hardcoded activities if no match
+        selectedActivity = hardcodedActivities[Math.floor(Math.random() * hardcodedActivities.length)];
       }
 
       const newScenario = {
+        ...selectedActivity,
         id: Date.now(),
-        title: String(parsed.title).slice(0, 80),
-        difficulty: ['Beginner', 'Intermediate', 'Advanced'].includes(parsed.difficulty)
-          ? parsed.difficulty
-          : 'Beginner',
-        points: Number.isFinite(parsed.points) ? Math.max(50, Math.min(300, Math.round(parsed.points))) : 120,
-        description: String(parsed.description || 'AI-generated practice lab'),
-        instructions: parsed.instructions.map((s: any) => String(s)),
-        commands: parsed.commands.map((s: any) => String(s)),
-        hints: (parsed.hints || parsed.instructions).map((s: any) => String(s)),
       } as typeof defaultPracticeScenarios[number];
 
       setScenarios(prev => [newScenario, ...prev]);
       setSelectedScenario(newScenario);
       handleReset();
+      setGenerationError(''); // Clear any previous errors
     } catch (e: any) {
       console.error('Scenario generation error:', e);
-      setGenerationError('Could not generate a lab. Please refine your prompt and try again.');
+      setGenerationError('Could not generate a lab. Please try again.');
     } finally {
       setIsGeneratingScenario(false);
     }
